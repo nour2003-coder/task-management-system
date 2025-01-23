@@ -7,12 +7,14 @@ import sqlite3  # or the database you're using
 def register_user():
     st.subheader("---- Register ----")
     
-    # Get user inputs
-    username = st.text_input('Enter your username')
-    password = st.text_input('Enter your password', type='password')
+    with st.form(key="register_form"):
+        username = st.text_input('Enter your username', key='username_input')
+        password = st.text_input('Enter your password', type='password', key='password_input')
+        register_button = st.form_submit_button('register')
+
 
     # Check if a button is clicked
-    if st.button('Register', key='register_button'):
+    if register_button:
         
         # Check if the username is already in the database
         cursor.execute("SELECT * FROM user_db WHERE username = ?", (username,))
@@ -37,26 +39,39 @@ def register_user():
 
 
 # Login User and validate credentials from SQL Server
+import streamlit as st
+
 def login_user():
     st.subheader("---- Login ----")
+    
+    # Create a form to keep inputs from resetting on each interaction
+    with st.form(key="login_form"):
+        username = st.text_input('Enter your username', key='username_input')
+        password = st.text_input('Enter your password', type='password', key='password_input')
+        login_button = st.form_submit_button('Login')
 
-    username = st.text_input('Enter your username')
-    password = st.text_input('Enter your password', type='password')
-
-    if st.button('login', key='login_button'):
-        cursor.execute("SELECT passworduser FROM user_db WHERE username = ?", username)
+    # Only proceed if the form is submitted
+    if login_button:
+        # Execute the SQL query to check username and password
+        cursor.execute("SELECT passworduser FROM user_db WHERE username = ?", (username,))
         user = cursor.fetchone()
+
         if not user:
             st.write("Username not found! Please register first.")
             return
-     
+
+        # Check if the entered password matches
         if user[0] == password:
-            st.write(f"\nWelcome back, {username}!")
-            st.session_state.page = 'user_dashboard'
-            user_dashboard(username)
+            st.write(f"Welcome back, {username}!")
+            st.session_state.page = 'user_dashboard'  # Update the page state
+            st.session_state.username = username  # Save username in session_state for persistence
+            user_dashboard(username)  # Call the user dashboard function
         else:
             st.write("Incorrect password! Try again.")
-
+    if st.session_state.page == 'user_dashboard':
+    # Show user dashboard if the user is logged in
+    # Your user dashboard code goes here
+        st.write("You are now on the user dashboard.")
 # Dashboard after successful login
 def user_dashboard(username):
     st.subheader(f"\n--- Dashboard: {username} ---")
