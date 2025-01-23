@@ -41,16 +41,15 @@ def login_user():
     st.subheader("---- Login ----")
 
     username = st.text_input('Enter your username')
+    password = st.text_input('Enter your password', type='password')
 
-    cursor.execute("SELECT passworduser FROM user_db WHERE username = ?", username)
-    user = cursor.fetchone()
-    password = st.text_input('Enter your password',type='password')
     if st.button('login', key='login_button'):
+        cursor.execute("SELECT passworduser FROM user_db WHERE username = ?", username)
+        user = cursor.fetchone()
         if not user:
             st.write("Username not found! Please register first.")
             return
-
-        
+     
         if user[0] == password:
             st.write(f"\nWelcome back, {username}!")
             st.session_state.page = 'user_dashboard'
@@ -60,27 +59,22 @@ def login_user():
 
 # Dashboard after successful login
 def user_dashboard(username):
-    while True:
-        print(f"\n--- Dashboard: {username} ---")
-        print("1. View Profile")
-        print("2. Change Password")
-        print("3. Manage tasks")
-        print("5. Update Profile Details")
-        print("4. Logout")
-        choice = input("Enter your choice (1, 2, 3, 5, or 4): ")
-        if choice == "1":
-            view_profile(username)
-        elif choice == "2":
-            change_password(username)
-        elif choice == "3":
-            manage_tasks(username)
-        elif choice == "5":
-            update_profile_details(username)
-        elif choice == "4":
-            print(f"Goodbye, {username}!")
-            break
-        else:
-            print("Invalid choice! Please try again.")
+    st.subheader(f"\n--- Dashboard: {username} ---")
+    if st.button("View Profile"):
+        st.session_state.page = 'view'
+        view_profile(username)
+    elif st.button("change password"):
+        st.session_state.page = 'change_password'
+        change_password(username)
+    elif st.button("Manage tasks"):
+        st.session_state.page = 'manage_tasks'
+        manage_tasks(username)
+    elif st.button("Update Profile Details"):
+        st.session_state.page = 'Update_Profile_Details'
+        update_profile_details(username)
+    elif st.button("back"):
+        st.write(f"Goodbye, {username}!")
+
 
 # View Profile
 def view_profile(username):
@@ -238,7 +232,6 @@ if st.button('Register'):
     register_user()
 if st.button('Login'):
     st.session_state.page = 'login'
-if st.session_state.page == 'login':
     login_user()
 
 cursor.close()  
