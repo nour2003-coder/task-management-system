@@ -226,7 +226,7 @@ def add_task(username):
     
     try:
         if submit_button:   
-            cursor.execute("SELECT * FROM task WHERE description = ?", (task,))
+            cursor.execute("SELECT * FROM task WHERE description = ? and username= ?", (task,username,))
             if cursor.fetchone(): 
                 st.warning("task already exists!")
                 return
