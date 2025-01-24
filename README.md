@@ -3,14 +3,14 @@
 ## 🌟 Overview
 The **User and Task Management System** is a web-based application designed to help users manage their tasks and profiles efficiently. Built using **Python** with **Streamlit** for a smooth web interface, and **Microsoft SQL Server** for reliable database management, this system allows users to register, log in, manage tasks, and update their profile information in a user-friendly environment.
 
----
+
 
 ## 🚀 Features
 - **User Registration and Login**: Secure sign-up and login system to manage users.
 - **Task Management**: Add, view, update, and delete tasks with ease.
 - **Profile Management**: Update user information like name, address, phone number, and date of birth.
 
----
+
 
 ## 🏗️ System Architecture
 The project consists of two main components:
@@ -44,7 +44,7 @@ CREATE TABLE task (
 );
 ```
 
----
+
 
 ## 🔧 How It Works
 The application is powered by Python, Streamlit, and SQL Server, providing a seamless user experience and efficient task management.
@@ -54,7 +54,7 @@ The application is powered by Python, Streamlit, and SQL Server, providing a sea
 3. **Task Management**: Users can create, update, and delete tasks associated with their profile.
 4. **Profile Management**: Users can update their personal information, including name, address, and phone number.
 
----
+
 
 ## 🖥️ Application Flow
 The core of the application is divided into two key files:
@@ -67,7 +67,7 @@ Streamlit provides a clean and interactive interface for the following features:
 - Profile management (view, update details, and change password).
 - Task management (add, view, update, and delete tasks).
 
----
+
 
 ## 📦 Installation & Running the Project
 To get the project up and running on your local machine:
@@ -88,7 +88,7 @@ To get the project up and running on your local machine:
 4. **Access the application**:
     - Open the provided URL to use the app in your browser.
 
----
+
 
 ## 🎯 Conclusion
 This project integrates Python and SQL Server to create an efficient task and user management system with a beautiful Streamlit interface. The modular design ensures flexibility for future feature extensions.
