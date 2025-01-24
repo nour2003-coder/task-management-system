@@ -97,7 +97,7 @@ def view_profile(username):
         st.error("Profile not found!")
     back=st.button("Back")
     if back:
-        switch_page('manage_tasks')
+        switch_page('dashboard')
         st.experimental_rerun()
 
 # View Tasks
@@ -105,7 +105,7 @@ def view_tasks(username):
     st.subheader("--- Your Tasks ---")
     back=st.button("Back")
     if back:
-        switch_page('dashboard')
+        switch_page('manage_tasks')
         st.experimental_rerun()
 
     cursor.execute("SELECT description FROM task WHERE username = ?", username)
@@ -182,7 +182,6 @@ def change_password(username):
                 st.error("Password must be at least 6 characters long!")
                 return
 
-            # Update the password in the database
             sql_command = """UPDATE user_db SET Passworduser = ? WHERE username = ?;"""
             cursor.execute(sql_command, (new_password, username))
             conn.commit()  
@@ -224,8 +223,13 @@ def add_task(username):
     with st.form(key="add_form"):
         task = st.text_input("Enter a new task: ")
         submit_button=st.form_submit_button("submit")
+    
     try:
         if submit_button:   
+            cursor.execute("SELECT * FROM task WHERE description = ?", (task,))
+            if cursor.fetchone(): 
+                st.warning("task already exists!")
+                return
             sql_command = """INSERT INTO task (username, description) VALUES (?, ?);"""
             cursor.execute(sql_command, (username, task))
             conn.commit()  
