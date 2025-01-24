@@ -1,16 +1,27 @@
 import streamlit as st
 
-# Create a slider
-x = st.slider('Select a value', 0, 100, 50)
-st.write(f'The selected value is: {x}')
+# Title
+st.title("Streamlit Form Example")
 
-# Text input field
-name = st.text_input('Enter your name')
-st.write(f'Hello, {name}!')
-st.title('My First Streamlit App')
+# Creating a form
+with st.form("my_form"):
+    st.header("User Input Form")
+    
+    # Input fields
+    name = st.text_input("Enter your name:")
+    age = st.number_input("Enter your age:", min_value=0, max_value=100, step=1)
+    gender = st.selectbox("Select your gender:", ["Male", "Female", "Other"])
+    feedback = st.text_area("Any additional feedback?")
 
-# Add a subtitle
-st.subheader('Streamlit makes it easy to create interactive web apps.')
+    # Submit button
+    submitted = st.form_submit_button("Submit")
 
-# Add some text
-st.write("This is a simple example to show Streamlit basics.")
+# Handling form submission
+if submitted:
+    st.success("Form submitted successfully!")
+    st.write("### Submitted Data:")
+    st.write(f"**Name:** {name}")
+    st.write(f"**Age:** {age}")
+    st.write(f"**Gender:** {gender}")
+    st.write(f"**Feedback:** {feedback}")
+

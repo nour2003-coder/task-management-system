@@ -1,253 +1,336 @@
 import connection
 import streamlit as st
-# Register User
-import streamlit as st
-import sqlite3  # or the database you're using
-
+from datetime import datetime
 def register_user():
     st.subheader("---- Register ----")
-    
+    back=st.button("back")
     with st.form(key="register_form"):
-        username = st.text_input('Enter your username', key='username_input')
-        password = st.text_input('Enter your password', type='password', key='password_input')
+        username = st.text_input('Enter your username',key='register_username')
+        password = st.text_input('Enter your password', type='password', key='register_password')
         register_button = st.form_submit_button('register')
+        
 
-
-    # Check if a button is clicked
     if register_button:
         
-        # Check if the username is already in the database
         cursor.execute("SELECT * FROM user_db WHERE username = ?", (username,))
-        if cursor.fetchone():  # If the username already exists
-            st.write("Username already exists! Try again.")
+        if cursor.fetchone(): 
+            st.error("Username already exists! Try again.")
             return
-        
-        # Validate password length
         if len(password) < 6:
-            st.write("Password must be at least 6 characters long!")
+            st.error("Password must be at least 6 characters long!")
             return
-        
-        # Insert the new user into the database
         try:
             sql_command = """INSERT INTO user_db (username, Passworduser) VALUES (?, ?);"""
             cursor.execute(sql_command, (username, password))
-            conn.commit()  # Commit the transaction to the database
-            st.write("Registration successful!")
+            conn.commit()  
+            st.success("Registration successful!")
         except Exception as e:
-            st.write(f"An error occurred: {e}")
-
-
-
-# Login User and validate credentials from SQL Server
-import streamlit as st
+            st.error(f"An error occurred: {e}")
+    if back:
+        switch_page('home')
+        st.experimental_rerun()
 
 def login_user():
     st.subheader("---- Login ----")
-    
-    # Create a form to keep inputs from resetting on each interaction
+    back=st.button("back")
     with st.form(key="login_form"):
-        username = st.text_input('Enter your username', key='username_input')
-        password = st.text_input('Enter your password', type='password', key='password_input')
+        username = st.text_input('Enter your username', key='login_username')
+        password = st.text_input('Enter your password', type='password', key='login_password')
         login_button = st.form_submit_button('Login')
-
-    # Only proceed if the form is submitted
+        
     if login_button:
-        # Execute the SQL query to check username and password
         cursor.execute("SELECT passworduser FROM user_db WHERE username = ?", (username,))
         user = cursor.fetchone()
-
         if not user:
-            st.write("Username not found! Please register first.")
+            st.error("Username not found! Please register first.")
             return
-
-        # Check if the entered password matches
         if user[0] == password:
-            st.write(f"Welcome back, {username}!")
-            st.session_state.page = 'user_dashboard'  # Update the page state
-            st.session_state.username = username  # Save username in session_state for persistence
-            user_dashboard(username)  # Call the user dashboard function
+            st.session_state.page = 'dashboard'
+            st.session_state.username = username
+            st.experimental_rerun()
         else:
-            st.write("Incorrect password! Try again.")
-    if st.session_state.page == 'user_dashboard':
-    # Show user dashboard if the user is logged in
-    # Your user dashboard code goes here
-        st.write("You are now on the user dashboard.")
+            st.error("Incorrect password! Try again.")
+    if back:
+        switch_page('home')
+        st.experimental_rerun()
+
 # Dashboard after successful login
 def user_dashboard(username):
-    st.subheader(f"\n--- Dashboard: {username} ---")
+    st.subheader(f"--- Dashboard: {username} ---")
     if st.button("View Profile"):
-        st.session_state.page = 'view'
-        view_profile(username)
-    elif st.button("change password"):
+        st.session_state.page = 'view_profile'
+        st.session_state.username = username
+        st.experimental_rerun()
+    if st.button("change password"):
         st.session_state.page = 'change_password'
-        change_password(username)
-    elif st.button("Manage tasks"):
+        st.session_state.username = username
+        st.experimental_rerun()
+    if st.button("Manage tasks"):
         st.session_state.page = 'manage_tasks'
-        manage_tasks(username)
-    elif st.button("Update Profile Details"):
-        st.session_state.page = 'Update_Profile_Details'
-        update_profile_details(username)
-    elif st.button("back"):
-        st.write(f"Goodbye, {username}!")
+        st.session_state.username = username
+        st.experimental_rerun()
+    if st.button("Update Profile Details"):
+        st.session_state.page = 'update_Profile_Details'
+        st.session_state.username = username
+        st.experimental_rerun()
+    if st.button("back"):
+        switch_page('home')
+        st.experimental_rerun()
+
+ 
 
 
-# View Profile
 def view_profile(username):
-    print(f"\n--- Profile ---")
-    cursor.execute("SELECT username, name, address, phone, Datebirth FROM user_db WHERE username = ?", username)
+    st.subheader(f"\n--- Profile ---")
+    
+    # Execute the SQL query to fetch the user's data
+    cursor.execute("SELECT username, name, address, phone, Datebirth FROM user_db WHERE username = ?", (username,))
     user = cursor.fetchone()
 
     if user:
-        print(f"Username: {user[0]}")
-        print("Name: ",{user[1] or ""})
-        print(f"Address: {user[2] or ""}")
-        print(f"Phone: {user[3] or ""}")
-        print(f"Date of Birth: {user[4] or ""}")
+        st.write(f"Username: {user[0]}")
+        st.write(f"Name: {user[1] or ''}")  
+        st.write(f"Address: {user[2] or ''}") 
+        st.write(f"Phone: {user[3] or ''}")  
+        st.write(f"Date of Birth: {user[4] or ''}")  
     else:
-        print("Profile not found!")
+        st.error("Profile not found!")
+    back=st.button("Back")
+    if back:
+        switch_page('manage_tasks')
+        st.experimental_rerun()
 
 # View Tasks
 def view_tasks(username):
-    print("\n--- Your Tasks ---")
+    st.subheader("--- Your Tasks ---")
+    back=st.button("Back")
+    if back:
+        switch_page('dashboard')
+        st.experimental_rerun()
+
     cursor.execute("SELECT description FROM task WHERE username = ?", username)
     tasks = cursor.fetchall()
 
     if not tasks:
-        print("No tasks available.")
+        st.write("No tasks available.")
     else:
         for i, task in enumerate(tasks, start=1):
-            print(f"{i}. {task[0]}")  # task[0] contains the task description
+            st.write(f"{i}. {task[0]}")  
 
 # Update Profile Details
 def update_profile_details(username):
-    print("\n--- Update Profile Details ---")
-
+    st.subheader("\n--- Update Profile Details ---")
+    back=st.button("back")
     # Fetch current profile data
     cursor.execute("SELECT Name, address, phone, Datebirth FROM user_db WHERE username = ?", (username,))
     user_data = cursor.fetchone()
 
     if not user_data:
-        print("No profile details found!")
+        st.error("No profile details found!")
         return
+    if isinstance(user_data[3], str):
+        dob = datetime.strptime(user_data[3], "%Y-%m-%d").date()
+    else:
+        dob = user_data[3]  # Assuming it's already a date object
+    with st.form(key="edit_form"):
+        name = st.text_input("New Name: ",placeholder=user_data[0] or "") or user_data[0]
+        address = st.text_input("New Address: ",placeholder=user_data[1] or "") or user_data[1]
+        phone = st.text_input("New Phone number: ",placeholder=user_data[2] or "") or user_data[2]
+        dob = st.date_input("New Date of Birth: ",value=dob if dob else None) or dob
+        edit_button = st.form_submit_button('edit')
+    if edit_button:
+        if dob > datetime.now().date():
+            st.error("Invalid Date of Birth! Please select a valid date of birth that is not in the future.")
+            return
+        if "+" not in phone :
+            st.error("Invalid Phone Number! The phone number must contain a '+' symbol, e.g., '+123456789'.")
+            return
+        try:
+            # Update the profile in the database
+            sql_command = """
+            UPDATE user_db 
+            SET Name = ?, address = ?, phone = ?, Datebirth = ? 
+            WHERE username = ?;
+            """
+            cursor.execute(sql_command, (name, address, phone, dob, username))
+            conn.commit()  # Commit changes to the database
 
-    # Ask for new profile details
-    name = input(f"Current Name: {user_data[0]}\nNew Name: ") or user_data[0]
-    address = input(f"Current Address: {user_data[1]}\nNew Address: ") or user_data[1]
-    phone = input(f"Current Phone: {user_data[2]}\nNew Phone: ") or user_data[2]
-    dob = input(f"Current Date of Birth: {user_data[3]}\nNew Date of Birth: ") or user_data[3]
-
-    # Update the profile in the database
-    sql_command = """
-    UPDATE user_db 
-    SET Name = ?, address = ?, phone = ?, Datebirth = ? 
-    WHERE username = ?;
-    """
-    cursor.execute(sql_command, (name, address, phone, dob, username))
-    conn.commit()  # Commit changes to the database
-
-    print("Profile updated successfully!")
+            st.success("Profile updated successfully!")
+        except Exception as e:
+                st.error(f"An error occurred: {e}")
+    if back:
+        switch_page('dashboard')
+        st.experimental_rerun()
 
 # Change Password
 def change_password(username):
-    print("\n--- Change Password ---")
-    old_password = input("Enter your current password: ")
+    st.subheader("\n--- Change Password ---")
+    back=st.button("Back")
+    if back:
+        switch_page('dashboard')
+        st.experimental_rerun()
+    with st.form(key="change_pass"):
+        old_password = st.text_input("Enter your current password: ",type="password",key='old_password')
+        new_password = st.text_input("Enter the new password: ",type="password",key='new_password')
+        pass_button=st.form_submit_button("change password")
+    if pass_button:
+        cursor.execute("SELECT Passworduser FROM user_db WHERE username = ?", (username,))
+        db_password = cursor.fetchone()
 
-    # Verify current password
-    cursor.execute("SELECT Passworduser FROM user_db WHERE username = ?", (username,))
-    db_password = cursor.fetchone()
+        if db_password and (db_password[0] == old_password):   
+            if len(new_password) < 6:
+                st.error("Password must be at least 6 characters long!")
+                return
 
-    if db_password and (db_password[0] == old_password):
-        new_password = input("Enter a new password: ")
-        if len(new_password) < 6:
-            print("Password must be at least 6 characters long!")
-            return
+            # Update the password in the database
+            sql_command = """UPDATE user_db SET Passworduser = ? WHERE username = ?;"""
+            cursor.execute(sql_command, (new_password, username))
+            conn.commit()  
 
-        # Update the password in the database
-        sql_command = """UPDATE user_db SET Passworduser = ? WHERE username = ?;"""
-        cursor.execute(sql_command, (new_password, username))
-        conn.commit()  # Commit changes to the database
-
-        print("Password updated successfully!")
-    else:
-        print("Incorrect current password! Password not changed.")
+            st.success("Password updated successfully!")
+        else:
+            st.error("Incorrect current password! Password not changed.")
 
 # Manage Tasks
 def manage_tasks(username):
-    while True:
-        print("\n--- Task Management ---")
-        print("1. View Tasks")
-        print("2. Add Task")
-        print("3. Update Task")
-        print("4. Delete Task")
-        print("5. Back to Dashboard")
-        choice = input("Enter your choice (1, 2, 3, 4, or 5): ")
-        if choice == "1":
-            view_tasks(username)
-        elif choice == "2":
-            add_task(username)
-        elif choice == "3":
-            update_task(username)
-        elif choice == "4":
-            delete_task(username)
-        elif choice == "5":
-            break
-        else:
-            print("Invalid choice! Please try again.")
+    st.subheader("--- Task Management ---")
+    if st.button("View Tasks"):
+        st.session_state.page = 'view_Tasks'
+        st.session_state.username = username
+        st.experimental_rerun()
+    if st.button("Add Task"):
+        st.session_state.page = 'add_task'
+        st.session_state.username = username
+        st.experimental_rerun()
+    if st.button("Update Task"):
+        st.session_state.page = 'update_task'
+        st.session_state.username = username
+        st.experimental_rerun()
+    if st.button("Delete Task"):
+        st.session_state.page = 'delete_task'
+        st.session_state.username = username
+        st.experimental_rerun()
+    if st.button("Back to Dashboard"):
+        switch_page('dashboard')
+        st.experimental_rerun()
 
 # Add Task
 def add_task(username):
-    print("\n--- Add Task ---")
-    task = input("Enter a new task: ")
-
-    # Insert task into the database
-    sql_command = """INSERT INTO task (username, description) VALUES (?, ?);"""
-    cursor.execute(sql_command, (username, task))
-    conn.commit()  # Commit changes to the database
-
-    print(f"Task '{task}' added successfully!")
-
+    st.subheader("--- Add Task ---")
+    back=st.button("Back")
+    if back:
+        switch_page('manage_tasks')
+        st.experimental_rerun()
+    with st.form(key="add_form"):
+        task = st.text_input("Enter a new task: ")
+        submit_button=st.form_submit_button("submit")
+    try:
+        if submit_button:   
+            sql_command = """INSERT INTO task (username, description) VALUES (?, ?);"""
+            cursor.execute(sql_command, (username, task))
+            conn.commit()  
+            st.success(f"Task '{task}' added successfully!")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
 # Update Task
 def update_task(username):
-    print("\n--- Update Task ---")
-    task_id = input("Enter the task  to update: ")
-    new_task = input("Enter the new task description: ")
+    st.subheader("--- Update Task ---")
+    back=st.button("Back")
+    if back:
+        switch_page('manage_tasks')
+        st.experimental_rerun()
+    cursor.execute("SELECT description FROM task WHERE username = ?", username)
+    tasks = cursor.fetchall()
 
-    # Update the task in the database
-    sql_command = """UPDATE task SET description = ? WHERE username = ? AND description = ?;"""
-    cursor.execute(sql_command, (new_task, username, task_id))
-    conn.commit()  # Commit changes to the database
+    if not tasks:
+        st.write("No tasks available.")
+    else:
+        task_descriptions = [task[0] for task in tasks]  
+        selected_task = st.radio("Select a task to update:", task_descriptions)
 
-    print(f"Task {task_id} updated successfully!")
+        # Input box for new task description
+        new_task = st.text_input("Enter new task description:", value=selected_task)
+        if st.button("Update Task"):
+            if new_task.strip() == "":
+                st.error("Task description cannot be empty!")
+            elif new_task == selected_task:
+                st.warning("No changes made. Please provide a different task description.")
+            else:
+                try:
+                    sql_command = """UPDATE task SET description = ? WHERE username = ? AND description = ?;"""
+                    cursor.execute(sql_command, (new_task, username, selected_task))
+                    conn.commit() 
+
+                    st.success(f"Task '{selected_task}' updated to '{new_task}' successfully!")
+                    st.experimental_rerun()  # Refresh the page to reflect changes
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
+
 
 # Delete Task
 def delete_task(username):
-    print("\n--- Delete Task ---")
-    task_id = input("Enter the task  to delete: ")
+    st.subheader("--- Delete Task ---")
+    back=st.button("Back")
+    if back:
+        switch_page('manage_tasks')
+        st.experimental_rerun()
+    cursor.execute("SELECT description FROM task WHERE username = ?", username)
+    tasks = cursor.fetchall()
 
-    # Delete the task from the database
-    sql_command = """DELETE FROM task WHERE username = ? and description = ?;"""
-    cursor.execute(sql_command, (username, task_id))
-    conn.commit()  # Commit changes to the database
+    if not tasks:
+        st.write("No tasks available.")
+    else:
+        task_descriptions = [task[0] for task in tasks]  
+        selected_task = st.radio("Select a task to delete:", task_descriptions)
+        if st.button("Delete Task"):
+                try:
+                    sql_command = """DELETE FROM task WHERE username = ? and description = ?;"""
+                    cursor.execute(sql_command, (username, selected_task))
+                    conn.commit() 
 
-    print(f"Task {task_id} deleted successfully!")
+                    st.success("Task  deleted successfully!")
+                    st.experimental_rerun()  
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
 
-# Main flow
+# Function to switch pages
+def switch_page(page_name):
+    st.session_state.page = page_name
 conn = connection.connect_to_db()
 cursor = conn.cursor()
-import streamlit as st
+
 
 # Initialize session state for page tracking if it doesn't exist
 if 'page' not in st.session_state:
     st.session_state.page = 'home' 
+if st.session_state.page == 'home':
+    st.title("Welcome")
+    st.button("Register", on_click=lambda: switch_page("register"))
+    st.button("Login", on_click=lambda: switch_page("login"))
 
-
-# Page navigation logic
-if st.button('Register'):
-    st.session_state.page = 'register'
+elif st.session_state.page == 'register':
     register_user()
-if st.button('Login'):
-    st.session_state.page = 'login'
+
+elif st.session_state.page == 'login':
     login_user()
+elif st.session_state.page == 'dashboard' and st.session_state.username:
+    user_dashboard(st.session_state.username)
+elif st.session_state.page == 'view_profile' and st.session_state.username:
+    view_profile(st.session_state.username)
+elif st.session_state.page == 'change_password' and st.session_state.username:
+    change_password(st.session_state.username)
+elif st.session_state.page == 'manage_tasks' and st.session_state.username:
+    manage_tasks(st.session_state.username)
+elif st.session_state.page == 'update_Profile_Details' and st.session_state.username:
+    update_profile_details(st.session_state.username)
+elif st.session_state.page == 'view_Tasks' and st.session_state.username:
+    view_tasks(st.session_state.username)
+elif st.session_state.page == 'add_task' and st.session_state.username:
+    add_task(st.session_state.username)
+elif st.session_state.page == 'update_task' and st.session_state.username:
+    update_task(st.session_state.username)
+elif st.session_state.page == 'delete_task' and st.session_state.username:
+    delete_task(st.session_state.username)
 
 cursor.close()  
 conn.close()  
